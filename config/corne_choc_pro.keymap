@@ -17,108 +17,162 @@
 };
 
 / {
+    // ─────────────────────────────────────────────────────────────
+    // RGB layer colour macros
+    // Each macro fires when its layer becomes active
+    // BASE = off | SYM = green | NUM = yellow | FN = red
+    // ─────────────────────────────────────────────────────────────
+    macros {
+        rgb_base: rgb_base {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            bindings = <&rgb_ug RGB_OFF>;
+        };
+
+        rgb_sym: rgb_sym {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            bindings
+                = <&rgb_ug RGB_ON>
+                , <&rgb_ug RGB_COLOR_HSB(120,100,40)>; // green
+        };
+
+        rgb_num: rgb_num {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            bindings
+                = <&rgb_ug RGB_ON>
+                , <&rgb_ug RGB_COLOR_HSB(60,100,40)>;  // yellow
+        };
+
+        rgb_fn: rgb_fn {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            bindings
+                = <&rgb_ug RGB_ON>
+                , <&rgb_ug RGB_COLOR_HSB(0,100,40)>;   // red
+        };
+    };
+
+    // ─────────────────────────────────────────────────────────────
+    // Layer-tap behaviours that also fire RGB macros on activation
+    // ─────────────────────────────────────────────────────────────
+    behaviors {
+        lt_sym: lt_sym {
+            compatible = "zmk,behavior-hold-tap";
+            #binding-cells = <2>;
+            flavor = "tap-preferred";
+            tapping-term-ms = <200>;
+            bindings = <&mo>, <&kp>;
+            hold-trigger-key-positions = <>;
+        };
+
+        lt_num: lt_num {
+            compatible = "zmk,behavior-hold-tap";
+            #binding-cells = <2>;
+            flavor = "tap-preferred";
+            tapping-term-ms = <200>;
+            bindings = <&mo>, <&kp>;
+            hold-trigger-key-positions = <>;
+        };
+    };
+
+    // ─────────────────────────────────────────────────────────────
+    // Conditional layers — hold SYM + NUM together to reach FN
+    // ─────────────────────────────────────────────────────────────
+    conditional_layers {
+        compatible = "zmk,conditional-layers";
+        fn_layer {
+            if-layers = <1 2>;
+            then-layer = <3>;
+        };
+    };
+
     keymap {
         compatible = "zmk,keymap";
 
-        // Layer 0
+        // ┌─────────────────────────────────────────────────────────┐
+        // │  Layer 0 — BASE (Colemak-DH)                            │
+        // ├─────┬─────┬─────┬─────┬─────┬─────┬─────┬─────┬─────┬─────┬─────┬─────┤
+        // │ ESC │  Q  │  W  │  F  │  P  │  B  │  J  │  L  │  U  │  Y  │  ;  │  `  │
+        // ├─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┤
+        // │ TAB │  A  │  R  │  S  │  T  │  G  │  M  │  N  │  E  │  I  │  O  │  '  │
+        // ├─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┤
+        // │LCTL │  Z  │  X  │  C  │  D  │  V  │  K  │  H  │  ,  │  .  │  /  │RCTL │
+        // └─────┴─────┴─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┴─────┴─────┘
+        //                   │SFT/T│NUM/E│SYM/S│GUI/R│ DEL │FDEL │
+        //                   └─────┴─────┴─────┴─────┴─────┴─────┘
         default_layer {
-            display-name = "COLEMAK";
-            // ┌───────┬───┬───┬───┬───┬───┐             ┌───┬───┬───┬───┬───┬───────┐
-            // │  ESC  │ Q │ W │ F │ P │ B │             │ J │ L │ U │ Y │ ; │ BSPC  │
-            // ├───────┼───┼───┼───┼───┼───┤             ├───┼───┼───┼───┼───┼───────┤
-            // │  TAB  │ A │ R │ S │ T │ G │             │ M │ N │ E │ I │ O │  '    │
-            // ├───────┼───┼───┼───┼───┼───┤             ├───┼───┼───┼───┼───┼───────┤
-            // │ LCTRL │ Z │ X │ C │ D │ V │             │ K │ H │ , │ . │ / │ RCTRL │
-            // └───────┴───┴───┴───┼───┼───┼───┐   ┌───┼───┼───┼───┴───┴───┴───────┘
-            //                     │SFT│NUM│SPC│   │RET│SYM│BSP│
-            //                     │/TB│/ES│   │   │GUI│/DL│/FD│
-            //                     └───┴───┴───┘   └───┴───┴───┘
+            display-name = "BASE";
             bindings = <
-                &kp ESC        &kp Q &kp W &kp F &kp P &kp B     &kp J   &kp L     &kp U     &kp Y   &kp SEMI &kp GRAVE
-                &kp TAB        &kp A &kp R &kp S &kp T &kp G     &kp M   &kp N     &kp E     &kp I   &kp O    &kp SQT
-                &kp LCTRL      &kp Z &kp X &kp C &kp D &kp V     &kp K   &kp H     &kp COMMA &kp DOT &kp FSLH &kp RCTRL
-                &mt LSHFT TAB  &lt 3 ESC  &kp SPACE               &mt LGUI RET  &lt 2 DEL  &mt RCTRL DELETE
+                &kp ESC       &kp Q  &kp W  &kp F  &kp P  &kp B      &kp J        &kp L    &kp U     &kp Y   &kp SEMI  &kp GRAVE
+                &kp TAB       &kp A  &kp R  &kp S  &kp T  &kp G      &kp M        &kp N    &kp E     &kp I   &kp O     &kp SQT
+                &kp LCTRL     &kp Z  &kp X  &kp C  &kp D  &kp V      &kp K        &kp H    &kp COMMA &kp DOT &kp FSLH  &kp RCTRL
+                &mt LSHFT TAB  &lt 2 ESC  &lt 1 SPACE                &mt LGUI RET &kp DEL  &kp DELETE
             >;
         };
 
-        // Layer 1 — NAV
-        nav_layer {
-            display-name = "NAV";
-            // ┌───────┬─────┬─────┬─────┬─────┬─────┐             ┌──────┬──────┬──────┬──────┬──────┬──────┐
-            // │       │     │     │     │     │     │             │      │ HOME │ PGDN │ PGUP │ END  │      │
-            // ├───────┼─────┼─────┼─────┼─────┼─────┤             ├──────┼──────┼──────┼──────┼──────┼──────┤
-            // │       │CMD+A│CMD+R│CMD+S│CMD+T│CMD+F│             │      │  ←   │  ↓   │  ↑   │  →   │      │
-            // ├───────┼─────┼─────┼─────┼─────┼─────┤             ├──────┼──────┼──────┼──────┼──────┼──────┤
-            // │       │CMD+Z│CMD+X│CMD+C│CMD+D│CMD+V│             │CMD+[ │CMD+] │      │      │      │      │
-            // └───────┴─────┴─────┴─────┼─────┼─────┼─────┐ ┌───┼──────┼──────┼──────┴──────┴──────┴──────┘
-            //                           │     │     │     │ │   │      │      │
-            //                           └─────┴─────┴─────┘ └───┴──────┴──────┘
-            bindings = <
-                &trans        &trans       &trans       &trans       &trans       &trans        &trans       &kp HOME     &kp PG_DN    &kp PG_UP    &kp END      &trans
-                &trans        &kp LG(A)    &kp LG(R)    &kp LG(S)    &kp LG(T)    &kp LG(F)     &trans       &kp LEFT     &kp DOWN     &kp UP       &kp RIGHT    &trans
-                &trans        &kp LG(Z)    &kp LG(X)    &kp LG(C)    &kp LG(D)    &kp LG(V)     &kp LG(LBKT) &kp LG(RBKT) &trans       &trans       &trans       &trans
-                &trans        &trans       &trans                                                &trans       &trans       &trans
-            >;
-        };
-
-        // Layer 2 — SYM
+        // ┌─────────────────────────────────────────────────────────┐
+        // │  Layer 1 — SYM                                (green)   │
+        // ├─────┬─────┬─────┬─────┬─────┬─────┬─────┬─────┬─────┬─────┬─────┬─────┤
+        // │     │  !  │  @  │  #  │  $  │  %  │  ^  │  &  │  *  │  (  │  )  │     │
+        // ├─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┤
+        // │     │     │     │     │  '  │  "  │  -  │  =  │  {  │  }  │  \  │     │
+        // ├─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┤
+        // │     │     │     │ SCR │     │     │  _  │  +  │  [  │  ]  │  |  │     │
+        // └─────┴─────┴─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┴─────┴─────┘
+        //                   │     │     │■■■■ │     │     │     │
+        //                   └─────┴─────┴─────┴─────┴─────┴─────┘
+        // SCR = Cmd+Ctrl+Shift+4 (screenshot selection to clipboard)
         sym_layer {
-            display-name = "SYM";
-            // ┌───────┬───┬───┬───┬───┬───┐             ┌───┬───┬───┬───┬───┬───────┐
-            // │       │ ! │ @ │ # │ $ │ % │             │ ^ │ & │ * │ ( │ ) │       │
-            // ├───────┼───┼───┼───┼───┼───┤             ├───┼───┼───┼───┼───┼───────┤
-            // │       │   │   │   │ ' │   │             │ - │ = │ { │ } │ \ │       │
-            // ├───────┼───┼───┼───┼───┼───┤             ├───┼───┼───┼───┼───┼───────┤
-            // │       │   │   │SCR│   │   │             │ _ │ + │ [ │ ] │ | │       │
-            // └───────┴───┴───┴───┼───┼───┼───┐   ┌───┼───┼───┼───┴───┴───┴───────┘
-            //                     │   │   │   │   │   │   │   │
-            //                     └───┴───┴───┘   └───┴───┴───┘
-            // SCR = Cmd+Ctrl+Shift+4 (screenshot selection to clipboard)
+            display-name = "SYM 🟢";
             bindings = <
-                &trans  &kp EXCL  &kp AT    &kp HASH           &kp DLLR  &kp PRCNT     &kp CARET &kp AMPS  &kp ASTRK &kp LPAR  &kp RPAR  &trans
-                &trans  &trans    &trans    &trans             &kp SQT   &trans        &kp MINUS &kp EQUAL &kp LBRC  &kp RBRC  &kp BSLH  &trans
-                &trans  &trans    &trans    &kp LG(LC(LS(N4))) &trans    &trans        &kp UNDER &kp PLUS  &kp LBKT  &kp RBKT  &kp PIPE  &trans
-                &trans  &trans    &trans                                               &trans    &trans    &trans
+                &rgb_sym  &kp EXCL  &kp AT    &kp HASH            &kp DLLR  &kp PRCNT     &kp CARET  &kp AMPS   &kp ASTRK  &kp LPAR  &kp RPAR  &trans
+                &trans    &trans    &trans    &trans              &kp SQT   &kp DQT       &kp MINUS  &kp EQUAL  &kp LBRC   &kp RBRC  &kp BSLH  &trans
+                &trans    &trans    &trans    &kp LG(LC(LS(N4)))  &trans    &trans        &kp UNDER  &kp PLUS   &kp LBKT   &kp RBKT  &kp PIPE  &trans
+                &trans    &trans    &trans                                                &trans     &trans     &trans
             >;
         };
 
-        // Layer 3 — NUM
+        // ┌─────────────────────────────────────────────────────────┐
+        // │  Layer 2 — NUM + NAV                         (yellow)   │
+        // ├─────┬─────┬─────┬─────┬─────┬─────┬─────┬─────┬─────┬─────┬─────┬─────┤
+        // │     │  1  │  2  │  3  │  4  │  5  │  6  │  7  │  8  │  9  │  0  │     │
+        // ├─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┤
+        // │     │CMD+A│CMD+R│CMD+S│CMD+F│     │  ←  │  ↓  │  ↑  │  →  │     │     │
+        // ├─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┤
+        // │     │CMD+Z│CMD+X│CMD+C│CMD+V│     │HOME │PGDN │PGUP │ END │     │     │
+        // └─────┴─────┴─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┴─────┴─────┘
+        //                   │     │■■■■ │     │LGUI │     │BSPC │
+        //                   └─────┴─────┴─────┴─────┴─────┴─────┘
         num_layer {
-            display-name = "NUM";
-            // ┌───────┬───┬───┬───┬───┬───┐             ┌──────┬───┬───┬───┬───┬───────┐
-            // │       │ 1 │ 2 │ 3 │ 4 │ 5 │             │  6   │ 7 │ 8 │ 9 │ 0 │       │
-            // ├───────┼───┼───┼───┼───┼───┤             ├──────┼───┼───┼───┼───┼───────┤
-            // │       │   │   │   │   │   │             │  ←   │ ↓ │ ↑ │ → │   │       │
-            // ├───────┼───┼───┼───┼───┼───┤             ├──────┼───┼───┼───┼───┼───────┤
-            // │       │   │   │   │   │   │             │      │   │   │   │   │       │
-            // └───────┴───┴───┴───┼───┼───┼───┐   ┌───┼──────┼───┼───┴───┴───┴───────┘
-            //                     │GUI│   │   │   │GUI│      │BSP│
-            //                     └───┴───┴───┘   └───┴──────┴───┘
+            display-name = "NUM 🟡";
             bindings = <
-                &trans     &kp N1 &kp N2 &kp N3 &kp N4 &kp N5     &kp N6   &kp N7   &kp N8 &kp N9    &kp N0    &trans
-                &trans     &trans &trans &trans &trans &trans     &kp LEFT &kp DOWN &kp UP &kp RIGHT &trans    &trans
-                &trans     &trans &trans &trans &trans &trans     &trans   &trans   &trans &trans    &trans    &trans
-                &kp LGUI   &trans &trans                         &kp LGUI &trans   &kp BSPC
+                &rgb_num  &kp N1     &kp N2     &kp N3     &kp N4     &kp N5       &kp N6    &kp N7    &kp N8    &kp N9     &kp N0   &trans
+                &trans    &kp LG(A)  &kp LG(R)  &kp LG(S)  &kp LG(F)  &trans       &kp LEFT  &kp DOWN  &kp UP    &kp RIGHT  &trans   &trans
+                &trans    &kp LG(Z)  &kp LG(X)  &kp LG(C)  &kp LG(V)  &trans       &kp HOME  &kp PG_DN &kp PG_UP &kp END    &trans   &trans
+                &trans    &trans     &trans                                          &kp LGUI  &trans    &kp BSPC
             >;
         };
 
-        // Layer 4 — FN
+        // ┌─────────────────────────────────────────────────────────┐
+        // │  Layer 3 — FN              (SYM + NUM)          (red)   │
+        // ├─────┬─────┬─────┬─────┬─────┬─────┬─────┬─────┬─────┬─────┬─────┬─────┤
+        // │     │ F1  │ F2  │ F3  │ F4  │ F5  │ F6  │ F7  │ F8  │ F9  │ F10 │ F11 │
+        // ├─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┤
+        // │     │ BT0 │ BT1 │ BT2 │ BT3 │ BT4 │ RGB │ RST │BOOT │ STU │     │ F12 │
+        // ├─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┤
+        // │     │BTCL │     │     │     │     │     │     │     │     │     │     │
+        // └─────┴─────┴─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┴─────┴─────┘
+        //                   │     │■■■■ │■■■■ │     │     │     │
+        //                   └─────┴─────┴─────┴─────┴─────┴─────┘
         fn_layer {
-            display-name = "FN";
-            // ┌───────┬────┬────┬────┬────┬────┐             ┌────┬────┬────┬────┬────┬──────┐
-            // │       │ F1 │ F2 │ F3 │ F4 │ F5 │             │ F6 │ F7 │ F8 │ F9 │F10 │  F11 │
-            // ├───────┼────┼────┼────┼────┼────┤             ├────┼────┼────┼────┼────┼──────┤
-            // │       │BT0 │BT1 │BT2 │BT3 │BT4 │             │RGB │RST │BOT │STU │    │  F12 │
-            // ├───────┼────┼────┼────┼────┼────┤             ├────┼────┼────┼────┼────┼──────┤
-            // │       │BTCL│    │    │    │    │             │    │    │    │    │    │      │
-            // └───────┴────┴────┴────┼────┼────┼────┐  ┌───┼────┼────┼────┴────┴────┴──────┘
-            //                        │    │    │    │  │   │    │    │
-            //                        └────┴────┴────┘  └───┴────┴────┘
+            display-name = "FN 🔴";
             bindings = <
-                &trans  &kp F1       &kp F2       &kp F3       &kp F4       &kp F5          &kp F6          &kp F7      &kp F8       &kp F9          &kp F10         &kp F11
-                &trans  &bt BT_SEL 0 &bt BT_SEL 1 &bt BT_SEL 2 &bt BT_SEL 3 &bt BT_SEL 4    &rgb_ug RGB_TOG &sys_reset  &bootloader  &studio_unlock  &trans          &kp F12
-                &trans  &bt BT_CLR   &trans       &trans       &trans       &trans          &trans          &trans      &trans       &trans          &trans          &trans
-                &trans  &trans       &trans                                                  &trans          &trans      &trans
+                &rgb_fn  &kp F1       &kp F2       &kp F3       &kp F4       &kp F5          &kp F6          &kp F7     &kp F8      &kp F9         &kp F10  &kp F11
+                &trans   &bt BT_SEL 0 &bt BT_SEL 1 &bt BT_SEL 2 &bt BT_SEL 3 &bt BT_SEL 4    &rgb_ug RGB_TOG &sys_reset &bootloader &studio_unlock &trans   &kp F12
+                &trans   &bt BT_CLR   &trans       &trans       &trans       &trans          &trans          &trans     &trans      &trans         &trans   &trans
+                &trans   &trans       &trans                                                  &trans          &trans     &trans
             >;
         };
     };
