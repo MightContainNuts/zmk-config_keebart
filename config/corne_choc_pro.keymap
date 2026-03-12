@@ -43,6 +43,48 @@
             #binding-cells = <0>;
             bindings = <&rgb_ug RGB_ON &rgb_ug RGB_COLOR_HSB(0,100,8)>;   // red
         };
+
+        // ── Momentary layer + RGB on press, restore BASE on release ──
+
+        mo_sym: mo_sym {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            bindings
+                = <&macro_press   &mo 1>
+                , <&macro_tap     &rgb_sym>
+                , <&macro_pause_for_release>
+                , <&macro_release &mo 1>
+                , <&macro_tap     &rgb_base>;
+        };
+
+        mo_num: mo_num {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            bindings
+                = <&macro_press   &mo 2>
+                , <&macro_tap     &rgb_num>
+                , <&macro_pause_for_release>
+                , <&macro_release &mo 2>
+                , <&macro_tap     &rgb_base>;
+        };
+
+        // FN is a conditional layer (SYM+NUM held together), so we
+        // fire rgb_fn when both are held. This macro is bound to a
+        // dedicated key on the FN layer itself as a visual indicator —
+        // the colour change happens naturally when both mo_sym + mo_num
+        // are held because mo_fn fires last via conditional_layers.
+        // To drive RGB automatically on FN, we override mo_sym to check:
+        // easier to just fire rgb_fn from the conditional layer key below.
+        mo_fn: mo_fn {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            bindings
+                = <&macro_press   &mo 3>
+                , <&macro_tap     &rgb_fn>
+                , <&macro_pause_for_release>
+                , <&macro_release &mo 3>
+                , <&macro_tap     &rgb_base>;
+        };
     };
 
     // ─────────────────────────────────────────────────────────────
@@ -55,6 +97,28 @@
         fn_layer {
             if-layers = <1 2>;
             then-layer = <3>;
+        };
+    };
+
+    // ─────────────────────────────────────────────────────────────
+    // Behaviors — hold-tap for thumb keys using the layer macros
+    // ─────────────────────────────────────────────────────────────
+
+    behaviors {
+        ht_sym: hold_tap_sym {
+            compatible = "zmk,behavior-hold-tap";
+            #binding-cells = <2>;
+            flavor = "balanced";
+            tapping-term-ms = <200>;
+            bindings = <&mo_sym>, <&kp>;
+        };
+
+        ht_num: hold_tap_num {
+            compatible = "zmk,behavior-hold-tap";
+            #binding-cells = <2>;
+            flavor = "balanced";
+            tapping-term-ms = <200>;
+            bindings = <&mo_num>, <&kp>;
         };
     };
 
@@ -77,10 +141,10 @@
         default_layer {
             display-name = "BASE";
             bindings = <
-&trans  &kp Q  &kp W  &kp F          &kp P      &kp B        &trans  &trans  &kp J         &kp L          &kp U       &kp Y    &kp SEMI  &trans
-&trans  &kp A  &kp R  &kp S          &kp T      &kp G        &trans  &trans  &kp M         &kp N          &kp E       &kp I    &kp O     &trans
-&trans  &kp Z  &kp X  &kp C          &kp D      &kp V                        &kp K         &kp H          &kp COMMA   &kp DOT  &kp FSLH  &trans
-                      &mt LSHFT TAB  &lt 2 ESC  &lt 1 SPACE                  &mt LGUI RET  &kp BACKSPACE  &kp DELETE
+&trans  &kp Q  &kp W  &kp F          &kp P            &kp B        &trans  &trans  &kp J         &kp L          &kp U       &kp Y    &kp SEMI  &trans
+&trans  &kp A  &kp R  &kp S          &kp T            &kp G        &trans  &trans  &kp M         &kp N          &kp E       &kp I    &kp O     &trans
+&trans  &kp Z  &kp X  &kp C          &kp D            &kp V                        &kp K         &kp H          &kp COMMA   &kp DOT  &kp FSLH  &trans
+                      &mt LSHFT TAB  &ht_num 0 ESC    &ht_sym 0 SPACE              &mt LGUI RET  &kp BACKSPACE  &kp DELETE
             >;
         };
 
@@ -99,7 +163,7 @@
         sym_layer {
             display-name = "SYM 🟢";
             bindings = <
-&trans  &kp EXCL  &kp AT_SIGN  &kp HASH  &kp DOLLAR          &kp PERCENT  &trans  &trans  &kp LCTRL  &kp AMPERSAND  &kp ASTERISK  &kp LEFT_PARENTHESIS  &kp RIGHT_PARENTHESIS  &trans
+&trans  &kp EXCL  &kp AT_SIGN  &kp HASH  &kp DOLLAR          &kp PERCENT  &trans  &trans  &kp CARET  &kp AMPERSAND  &kp ASTERISK  &kp LEFT_PARENTHESIS  &kp RIGHT_PARENTHESIS  &trans
 &trans  &trans    &trans       &trans    &kp DQT             &kp SQT      &trans  &trans  &kp MINUS  &kp EQUAL      &kp LBRC      &kp RBRC              &kp BSLH               &trans
 &trans  &trans    &trans       &trans    &kp LG(LC(LS(N4)))  &trans                       &kp UNDER  &kp PLUS       &kp LBKT      &kp RBKT              &kp PIPE               &trans
                                &trans    &trans              &trans                       &kp GRAVE  &kp TILDE      &kp SQT
@@ -124,16 +188,16 @@
 &trans  &kp NUMBER_1  &kp NUMBER_2  &kp NUMBER_3  &kp NUMBER_4  &kp N5     &trans  &trans  &kp NUMBER_6  &kp N7    &kp N8     &kp N9     &kp N0     &trans
 &trans  &trans        &kp LG(A)     &kp LG(R)     &kp LG(S)     &kp LG(F)  &trans  &trans  &trans        &kp LEFT  &kp DOWN   &kp UP     &kp RIGHT  &trans
 &trans  &trans        &kp LG(Z)     &kp LG(X)     &kp LG(C)     &kp LG(V)                  &trans        &kp HOME  &kp PG_DN  &kp PG_UP  &kp END    &trans
-                                    &trans        &trans        &trans                     &kp LGUI      &trans    &kp BSPC
+                                    &trans        &trans        &trans                      &kp LGUI      &trans    &kp BSPC
             >;
         };
 
         // ┌──────────────────────────────────────────────────────────────────────────────┐
         // │  Layer 3 — FN                           (SYM + NUM)             (red)        │
         // ├──────┬─────┬─────┬─────┬─────┬─────┬──────┬──────┬─────┬─────┬─────┬─────┬─────┬──────┤
-        // │(tr)  │ F1  │ F2  │ F3  │ F4  │ F5  │(tr)  │(tr)  │ F6  │ F7  │ F8  │ F9  │ F10 │(tr)  │
+        // │(tr)  │rgb▶ │ F1  │ F2  │ F3  │ F4  │(tr)  │(tr)  │ F5  │ F6  │ F7  │ F8  │ F9  │(tr)  │
         // ├──────┼─────┼─────┼─────┼─────┼─────┼──────┼──────┼─────┼─────┼─────┼─────┼─────┼──────┤
-        // │(tr)  │ BT0 │ BT1 │ BT2 │ BT3 │ BT4 │(tr)  │(tr)  │ RGB │ RST │BOOT │ STU │     │(tr)  │
+        // │(tr)  │     │ BT0 │ BT1 │ BT2 │ BT3 │(tr)  │(tr)  │ BT4 │ TOG │ RST │BOOT │ STU │(tr)  │
         // ├──────┼─────┼─────┼─────┼─────┼─────┼──────┴──────┼─────┼─────┼─────┼─────┼─────┼──────┤
         // │(tr)  │BTCL │     │     │     │     │             │     │     │     │ F11 │ F12 │(tr)  │
         // └──────┴─────┴─────┼─────┼─────┼─────┼─────────────┼─────┼─────┼─────┴─────┴─────┴──────┘
