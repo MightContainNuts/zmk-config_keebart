@@ -76,6 +76,15 @@
                 <&rgb_base>;
         };
 
+        eur: eur {
+        compatible = "zmk,behavior-macro";
+        #binding-cells = <0>;
+        bindings = 
+            <&macro_press &kp LALT>,
+            <&macro_tap &kp LS(N2)>,
+            <&macro_release &kp LALT>;
+        };
+
         // FN is a conditional layer (SYM+NUM held together), so we
         // fire rgb_fn when both are held. This macro is bound to a
         // dedicated key on the FN layer itself as a visual indicator —
