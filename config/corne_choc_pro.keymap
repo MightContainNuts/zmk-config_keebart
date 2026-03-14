@@ -176,10 +176,10 @@
         sym_layer {
             display-name = "SYM 🟢";
             bindings = <
-&trans  &kp EXCL  &kp AT_SIGN  &kp HASH  &kp DOLLAR          &kp PERCENT  &trans  &trans  &kp CARET  &kp AMPERSAND  &kp ASTERISK  &kp LEFT_PARENTHESIS  &kp RIGHT_PARENTHESIS  &trans
-&trans  &trans    &trans       &trans    &kp DQT             &kp SQT      &trans  &trans  &kp MINUS  &kp EQUAL      &kp LBRC      &kp RBRC              &kp BSLH               &trans
-&trans  &trans    &trans       &trans    &kp LG(LC(LS(N4)))  &trans                       &kp UNDER  &kp PLUS       &kp LBKT      &kp RBKT              &kp PIPE               &trans
-                               &trans    &trans              &trans                       &kp GRAVE  &kp TILDE      &kp SQT
+&trans  &kp EXCL      &kp AT_SIGN  &kp HASH  &kp DOLLAR          &kp PERCENT  &trans  &trans  &kp CARET  &kp AMPERSAND  &kp ASTERISK  &kp LEFT_PARENTHESIS  &kp RIGHT_PARENTHESIS  &trans
+&trans  &kp LEFT_ALT  &trans       &trans    &kp DQT             &kp SQT      &trans  &trans  &kp MINUS  &kp EQUAL      &kp LBRC      &kp RBRC              &kp BSLH               &trans
+&trans  &trans        &trans       &trans    &kp LG(LC(LS(N4)))  &trans                       &kp UNDER  &kp PLUS       &kp LBKT      &kp RBKT              &kp PIPE               &trans
+                                   &trans    &trans              &trans                       &kp GRAVE  &kp TILDE      &kp SQT
             >;
         };
 
